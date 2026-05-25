@@ -58,20 +58,26 @@ if (fs.existsSync(apiDir)) {
     }
 }
 
-// Serve static files - AFTER API
-app.use(express.static(path.join(__dirname, '../frontend/public'), { redirect: false }));
-app.use('/src', express.static(path.join(__dirname, '../frontend/src')));
+// Serve static files - ONLY if frontend exists
+const frontendPublicPath = path.join(__dirname, '../frontend/public');
+const frontendSrcPath = path.join(__dirname, '../frontend/src');
 
-// Rewrites for SPA-like navigation
-app.get('/admin', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/public/admin/admin.html'));
-});
-app.get('/admin-login', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/public/admin/admin-login.html'));
-});
-app.get('/payment', (req, res) => res.sendFile(path.join(__dirname, '../frontend/public/payment.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, '../frontend/public/dashboard.html')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../frontend/public/index.html')));
+if (fs.existsSync(frontendPublicPath)) {
+    app.use(express.static(frontendPublicPath, { redirect: false }));
+    app.use('/src', express.static(frontendSrcPath));
+
+    // Rewrites for SPA-like navigation
+    app.get('/admin', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'admin/admin.html')));
+    app.get('/admin-login', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'admin/admin-login.html')));
+    app.get('/payment', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'payment.html')));
+    app.get('/dashboard', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'dashboard.html')));
+    app.get('/', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'index.html')));
+} else {
+    // Basic root route for standalone API
+    app.get('/', (req, res) => {
+        res.json({ message: '🚀 Rental Portal API is running!', status: 'healthy' });
+    });
+}
 
 const PORT = process.env.PORT || 5501;
 app.listen(PORT, '0.0.0.0', () => {
