@@ -59,19 +59,17 @@ if (fs.existsSync(apiDir)) {
 }
 
 // Serve static files - ONLY if frontend exists
-const frontendPublicPath = path.join(__dirname, '../frontend/public');
-const frontendSrcPath = path.join(__dirname, '../frontend/src');
+const frontendPath = path.join(__dirname, '../frontend');
 
-if (fs.existsSync(frontendPublicPath)) {
-    app.use(express.static(frontendPublicPath, { redirect: false }));
-    app.use('/src', express.static(frontendSrcPath));
+if (fs.existsSync(path.join(frontendPath, 'index.html'))) {
+    app.use(express.static(frontendPath, { redirect: false }));
 
     // Rewrites for SPA-like navigation
-    app.get('/admin', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'admin/admin.html')));
-    app.get('/admin-login', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'admin/admin-login.html')));
-    app.get('/payment', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'payment.html')));
-    app.get('/dashboard', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'dashboard.html')));
-    app.get('/', (req, res) => res.sendFile(path.resolve(frontendPublicPath, 'index.html')));
+    app.get('/admin', (req, res) => res.sendFile(path.resolve(frontendPath, 'admin/admin.html')));
+    app.get('/admin-login', (req, res) => res.sendFile(path.resolve(frontendPath, 'admin/admin-login.html')));
+    app.get('/payment', (req, res) => res.sendFile(path.resolve(frontendPath, 'payment.html')));
+    app.get('/dashboard', (req, res) => res.sendFile(path.resolve(frontendPath, 'dashboard.html')));
+    app.get('/', (req, res) => res.sendFile(path.resolve(frontendPath, 'index.html')));
 } else {
     // Basic root route for standalone API
     app.get('/', (req, res) => {
