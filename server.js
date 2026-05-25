@@ -19,7 +19,7 @@ const app = express();
 // Configure CORS from environment
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim().replace(/\/$/, '')) 
-    : '*';
+    : ['*'];
 
 console.log('🌐 Allowed Origins:', allowedOrigins);
 
@@ -27,7 +27,9 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
-        if (allowedOrigins === '*' || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+        
+        const cleanOrigin = origin.replace(/\/$/, '');
+        if (allowedOrigins.includes('*') || allowedOrigins.includes(cleanOrigin)) {
             callback(null, true);
         } else {
             console.warn(`🚫 CORS blocked for origin: ${origin}`);
