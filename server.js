@@ -20,14 +20,33 @@ const app = express();
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim().replace(/\/$/, '')) 
     : '*';
+
+console.log('🌐 Allowed Origins:', allowedOrigins);
+
 app.use(cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins === '*' || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+            callback(null, true);
+        } else {
+            console.warn(`🚫 CORS blocked for origin: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Normalize URLs (fix double slashes)
+app.use((req, res, next) => {
+    req.url = req.url.replace(/\/+/g, '/');
+    next();
+});
 
 // Request Logger
 app.use((req, res, next) => {
